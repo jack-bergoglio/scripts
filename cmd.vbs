@@ -1,4 +1,4 @@
 Dim oShell
 Set oShell = WScript.CreateObject ("WScript.Shell")
-oShell.run "cmd /K CD C:\ & dir & hostname & whoami /priv"
+oShell.run "cmd /K CD C:\ & dir C:\Users"
 Set oShell = Nothing
