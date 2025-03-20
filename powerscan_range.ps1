@@ -24,13 +24,13 @@ for ($ipInt = $startIPInt; $ipInt -le $endIPInt; $ipInt++) {
 
     # Iterate through the ports
     foreach ($port in $ports) {
-        # Test the port with timeout
+        # Test the port with timeout using ConnectAsync and Task
         try {
             $tcpClient = New-Object System.Net.Sockets.TcpClient
-            $connectAsync = $tcpClient.BeginConnect($ip, $port, $null, $null)
-            $connectAsync.AsyncWaitHandle.WaitOne($timeoutMilliseconds)
+            $connectTask = $tcpClient.ConnectAsync($ip, $port)
+            $taskCompleted = $connectTask.Wait($timeoutMilliseconds)
 
-            if ($tcpClient.Connected) {
+            if ($taskCompleted -and $tcpClient.Connected) {
                 Write-Host "Port $port is open on $ip"
                 $tcpClient.Close()
             } else {
@@ -38,7 +38,7 @@ for ($ipInt = $startIPInt; $ipInt -le $endIPInt; $ipInt++) {
             }
         }
         catch {
-             #Write-Host "Error connecting to port $port on $ip: $($_.Exception.Message)"
+            #Write-Host "Error connecting to port $port on $ip: $($_.Exception.Message)"
         }
         finally {
             if ($tcpClient -and $tcpClient.Connected) {
