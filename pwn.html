@@ -5,7 +5,7 @@
         var cmd = document.getElementById('cmd').value
         var shell = new ActiveXObject("WScript.Shell");
         try {
-            var execOut = shell.Exec("cmd.exe /C \"" + cmd + "\"");
+            var execOut = shell.Exec("powershell.exe /C \"" + cmd + "\"");
         } catch (e) {
             console.log(e);
         }
