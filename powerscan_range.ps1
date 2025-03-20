@@ -2,6 +2,7 @@
 $startIP = Read-Host "Enter the starting IP address"
 $endIP = Read-Host "Enter the ending IP address"
 $portsInput = Read-Host "Enter the ports to scan (comma-separated, e.g., 22,80,443)"
+$timeoutMilliseconds = 1000 # Set timeout to 1 second (adjust as needed)
 
 # Convert comma-separated ports to an array of integers
 $ports = $portsInput.Split(',') | ForEach-Object { [int]$_.Trim() }
@@ -23,21 +24,24 @@ for ($ipInt = $startIPInt; $ipInt -le $endIPInt; $ipInt++) {
 
     # Iterate through the ports
     foreach ($port in $ports) {
-        # Test the port
+        # Test the port with timeout
         try {
             $tcpClient = New-Object System.Net.Sockets.TcpClient
-            $tcpClient.Connect($ip, $port)
+            $connectAsync = $tcpClient.BeginConnect($ip, $port, $null, $null)
+            $connectAsync.AsyncWaitHandle.WaitOne($timeoutMilliseconds)
+
             if ($tcpClient.Connected) {
                 Write-Host "Port $port is open on $ip"
                 $tcpClient.Close()
+            } else {
+                #Write-Host "Port $port is closed or timed out on $ip"
             }
         }
         catch {
-            # Port is closed or host is unreachable
-            #Write-Host "Port $port is closed or host unreachable on $ip"
+             #Write-Host "Error connecting to port $port on $ip: $($_.Exception.Message)"
         }
-        finally{
-            if($tcpClient -and $tcpClient.Connected){
+        finally {
+            if ($tcpClient -and $tcpClient.Connected) {
                 $tcpClient.Close()
             }
         }
